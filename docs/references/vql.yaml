@@ -11,7 +11,7 @@
     Dereferencing the `Artifact` plugin with "." will yield runners
     for the named artifact.
 
-    For example the following query:
+    For example, the following query:
 
     ```vql
     SELECT * FROM Artifact.Generic.Client.Info()
