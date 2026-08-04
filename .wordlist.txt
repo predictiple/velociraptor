@@ -3,3 +3,10 @@ builtin
 vss
 unexported
 paren
+parseable
+parens
+callable's
+unaliased
+lsp
+opencode
+upcase
