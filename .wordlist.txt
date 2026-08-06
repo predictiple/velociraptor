@@ -10,3 +10,4 @@ unaliased
 lsp
 opencode
 upcase
+pfctl
