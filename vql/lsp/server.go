@@ -99,6 +99,45 @@ func (self *Server) Initialize(
 			CompletionProvider: &protocol.CompletionOptions{
 				TriggerCharacters: []string{".", "("},
 			},
+
+			// The server provides signature help inside calls.
+			SignatureHelpProvider: &protocol.SignatureHelpOptions{
+				TriggerCharacters: []string{"(", ","},
+			},
+
+			// The server finds references to symbols in the
+			// current document.
+			ReferencesProvider: protocol.Boolean(true),
+
+			// The server renames LET variables and symbols within
+			// the current document.
+			RenameProvider: protocol.Boolean(true),
+
+			// The server formats whole documents.
+			DocumentFormattingProvider: protocol.Boolean(true),
+
+			// The server provides code actions (quick fixes).
+			CodeActionProvider: protocol.Boolean(true),
+
+			// The server provides folding ranges for queries and
+			// LET blocks.
+			FoldingRangeProvider: protocol.Boolean(true),
+
+			// The server provides semantic tokenization of the
+			// whole document.
+			SemanticTokensProvider: &protocol.SemanticTokensOptions{
+				Legend: protocol.SemanticTokensLegend{
+					TokenTypes:     tokenTypesLegend,
+					TokenModifiers: tokenModifiersLegend,
+				},
+				Full: &protocol.SemanticTokensFullDelta{Delta: ptr(false)},
+			},
+
+			// The server provides inlay hints (argument types).
+			InlayHintProvider: protocol.Boolean(true),
+
+			// The server provides workspace symbol search.
+			WorkspaceSymbolProvider: protocol.Boolean(true),
 		},
 		ServerInfo: protocol.ServerInfo{
 			Name:    "vql-lsp",

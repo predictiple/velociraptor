@@ -99,6 +99,28 @@ func TestServerInitializeCapabilities(t *testing.T) {
 	require.NotNil(t, completion_opts)
 	assert.Contains(t, completion_opts.TriggerCharacters, ".")
 	assert.Contains(t, completion_opts.TriggerCharacters, "(")
+
+	// Signature help should be advertised with trigger characters.
+	signature_opts := result.Capabilities.SignatureHelpProvider
+	require.NotNil(t, signature_opts)
+	assert.Contains(t, signature_opts.TriggerCharacters, "(")
+
+	// The other IDE features should be advertised.
+	assert.NotNil(t, result.Capabilities.ReferencesProvider)
+	assert.NotNil(t, result.Capabilities.RenameProvider)
+	assert.NotNil(t, result.Capabilities.DocumentFormattingProvider)
+	assert.NotNil(t, result.Capabilities.CodeActionProvider)
+	assert.NotNil(t, result.Capabilities.FoldingRangeProvider)
+	assert.NotNil(t, result.Capabilities.InlayHintProvider)
+	assert.NotNil(t, result.Capabilities.WorkspaceSymbolProvider)
+
+	// Semantic tokens should advertise a legend.
+	semantic_provider := result.Capabilities.SemanticTokensProvider
+	require.NotNil(t, semantic_provider)
+	semantic_opts, ok := semantic_provider.(*protocol.SemanticTokensOptions)
+	require.True(t, ok, "SemanticTokensProvider should be *SemanticTokensOptions")
+	assert.Equal(t, tokenTypesLegend, semantic_opts.Legend.TokenTypes)
+	assert.NotEmpty(t, semantic_opts.Legend.TokenTypes)
 }
 
 func TestServerDidOpenAndPullDiagnostic(t *testing.T) {

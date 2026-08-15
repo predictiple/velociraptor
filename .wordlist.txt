@@ -11,3 +11,13 @@ unaliased
 lsp
 opencode
 upcase
+unparseable
+renameable
+lexing
+mcpls
+Neovim
+gomock
+participle
+frontmatter
+bogusfunc
+reformatter
