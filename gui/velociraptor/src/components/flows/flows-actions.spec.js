@@ -138,14 +138,12 @@ test.describe.serial("Collection action toolbar", () => {
     await page.goto("/app/index.html?org_id=root#/collected/server");
     await expect(page.locator("nav.flow-toolbar")).toBeVisible();
 
-    // NOTE: the button's sr-only text is "Show only my hunts" (copy-paste
-    // bug in flows-list.jsx) — the tooltip says "Show only my collections".
-    // We freeze the actual accessible name.
-    await page.getByRole("button", { name: "Show only my hunts" }).click();
+    // The button's sr-only text and tooltip both say "Show only my collections".
+    await page.getByRole("button", { name: "Show only my collections" }).click();
     await expect(page.locator(".transform-viewer")).toContainText(/Creator\s*\(\s*admin\s*\)/);
 
     // The toggle flips to "Show all collections" — click it to clear.
-    await page.getByRole("button", { name: "Show all hunts" }).click();
+    await page.getByRole("button", { name: "Show all collections" }).click();
     await expect(page.locator(".transform-viewer")).toHaveCount(0);
   });
 });

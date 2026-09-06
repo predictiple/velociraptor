@@ -102,13 +102,15 @@ E2E:  `src/components/events/event-lifecycle.spec.js` (1 test)
 | Journey | Happy | Empty | Loading | Error | Edge |
 |---|---|---|---|---|---|
 | View monitoring tables | ✅ | ✅ "Please select an artifact to view above." | — | — | — |
-| Select artifact from dropdown | ✅ | — | — | — | ✅ deep link to slash-named artifact fails (router) |
+| Select artifact from dropdown | ✅ | — | — | — | ✅ deep link to slash-named artifact (URL-encoded) |
 | Update monitoring table | ✅ (E2E) | — | — | — | ✅ Launch auto-submits when no tools |
 | Show/hide server vs client tables | ✅ | — | — | — | |
 | Edit/delete notebook from events | ✅ | — | — | — | ✅ notebook auto-created, cleaned via API |
 
 **Gotchas (documented behavior quirks):**
-- **Router slash bug:** deep links to slash-named artifacts (`Server.Monitor.Health/Prometheus`) fail — the `/` is parsed as the `:time` route param, so the artifact resolves to `Server.Monitor.Health` and no table renders. Must select via the `.event-artifacts` dropdown.
+- **Router slash handling:** the GUI URL-encodes artifact names
+  (`encodeURIComponent`) so slash-named artifacts (`Server.Monitor.Health/Prometheus`)
+  deep-link correctly — the encoded `%2F` is not parsed as the `:time` route param.
 - **ColumnToggle menu stays open after a select** (controlled `show`: `open = metadata.source === "select" || nextOpen`); don't re-click the toggle between toggles.
 - **Artifact row click TOGGLES** selection — clicking an already-monitored artifact removes it.
 - Search filters results, so `row-selected` count is relative to the filtered set — scope with `hasText` on the artifact name.
@@ -168,13 +170,14 @@ until state FINISHED), afterAll deletes it via `Server.Utils.DeleteFlow`
 `ReallyDoIt=Y`; runs async, may lag 30-60s). Tests Copy Collection wizard,
 Save Collection favorites dialog, Cancel disabled for FINISHED, and the
 "Show only my collections" filter. Rows are matched by flow ID (not index)
-for robustness. GUI quirks frozen: the SaveCollectionDialog reads
-`flow.artifacts_with_results`, which `GetFlowDetails` does NOT include, so
-the favorites dialog genuinely shows no artifact names — the test asserts
-title + Name/Description fields only; the toolbar my-collections toggle's
-sr-only text is **"Show only my hunts"** (copy-paste bug) — that IS its
-accessible name; clear the filter via "Show all hunts". `GetClientFlows`
-pagination params are `start_row` + `rows` (not `page_size`/`count`/`start`).
+for robustness. The SaveCollectionDialog reads `flow.artifacts_with_results`,
+which is populated only when the flow produced result rows — the test's
+`Server.Information.Users` flow produces zero rows on this server (no
+Windows clients), so the favorites dialog shows no artifact names; the test
+asserts title + Name/Description fields only. The toolbar my-collections
+toggle's sr-only text is "Show only my collections" (was "Show only my
+hunts"). `GetClientFlows` pagination params are `start_row` + `rows` (not
+`page_size`/`count`/`start`).
 
 ---
 
@@ -189,7 +192,7 @@ Specs: `src/components/notebooks/notebooks.spec.js` (7 tests),
 |---|---|---|---|---|---|
 | View notebook list | ✅ | ✅ empty-state prompt | — | — | — |
 | New Notebook | ✅ wizard 5 steps + template | — | — | — | |
-| Copy Notebook | ✅ wizard prefilled | — | — | — | ⚠️ sr-only "New Notebook" bug |
+| Copy Notebook | ✅ wizard prefilled | — | — | — | |
 | Delete Notebook (confirm) | ✅ lifecycle E2E | — | — | — | ⚠️ index refresh race |
 | Edit Notebook | ✅ dialog prefilled | — | — | — | |
 | Export Notebook | ✅ dialog opens | — | — | — | |
@@ -199,11 +202,12 @@ Specs: `src/components/notebooks/notebooks.spec.js` (7 tests),
 | Cell: render table/chart | ✅ table output | — | — | — | |
 
 **Gotchas (documented behavior quirks):**
-- **Copy Notebook button has sr-only text "New Notebook"** (copy-paste bug in
-  notebooks-list.jsx) — `getByRole("button", {name: "New Notebook"})` resolves
-  to 2 buttons; always use `page.locator("nav.toolbar button", {hasText: "New Notebook"}).first()`.
-- **Wizard steps 1 and 3 both titled "New Notebook: Configure Parameters"** —
-  strict-mode violation; use `.first()` for title assertions.
+- **Copy Notebook button** sr-only text is "Copy Notebook" (was "New
+  Notebook" — a copy-paste bug); `getByRole("button", {name: "Copy Notebook"})`
+  resolves uniquely.
+- **Wizard step 1 is titled "New Notebook: Configure Notebook"** (was
+  "Configure Parameters" — a copy-paste bug); step 3 is still "New Notebook:
+  Configure Parameters" — use `.first()` for title assertions.
 - **Wizard gating differs from hunts/flows:** step 1 (Configure Notebook)
   enables ALL steps (no `isFocused`); only step 2 (Select Template) gates
   Configure Parameters/Review/Launch until a template artifact is chosen.
@@ -266,19 +270,20 @@ Specs: `src/components/users/users.spec.js` (10 tests),
   returns an empty fragment when `username` is empty); "Please Select an Org"
   renders as a bare `div.no-content` WITHOUT the `.permission-viewer` class —
   scope third-column assertions to `.users-search-panel .row > .col-sm-4`.
-- **Role toggles detach during updates:** `setACL()` resets the ACL to `{}`
-  ("Loading ACLs") while the `SetUserRoles` POST is in flight, removing the
-  switches from the DOM. Use `click()` + `expect().toBeChecked()` (which
-  re-queries) — `check()`/`uncheck()` fail on the detached element.
+- **Role toggles detach during updates:** `setACL()` refreshes the ACL after
+  `SetUserRoles` (the refresh no longer blanks the ACL — fixed on
+  `fix-gui-quirks`), but the ACL still loads async. Use `click()` +
+  `expect().toBeChecked()` (which re-queries) — `check()`/`uncheck()` fail on
+  a detached element.
 - **`org_admin` role and `ORG_ADMIN` permission are disabled outside the root
   org** (`isRoleDisabled`/`isPermissionDisabled` in user-inspector.jsx).
 - **Effective Permissions card:** perms in `effective_permissions` render
   checked AND disabled (`Perm2_*` ids); perms NOT in the set stay enabled.
   Admin has no "Extra Permissions" card (no extra perms) — only Roles +
   Effective Permissions cards.
-- **Add User dialog title is "Add a new  User"** (double space in the i18n
-  key); `getByText` normalizes whitespace and also matches the sr-only
-  toolbar label + tooltip — scope to `.modal-title`.
+- **Add User dialog title is "Add a new User"** (was double-spaced);
+  `getByText` also matches the sr-only toolbar label + tooltip — scope to
+  `.modal-title`.
 - **Modal "Close" buttons:** header X (`aria-label="Close"`) + footer button —
   scope to `.modal-footer button`.
 - **Removing the last role** triggers the ConfirmDialog
@@ -418,9 +423,9 @@ Expression, share-with-users, visible-to-all-orgs.
 (SMTP Creds, `{server, server_port}`), afterAll `POST /api/v1/ModifySecret
 {delete:true}`. Tests the Edit Secret dialog: title "Edit Secret properties",
 "Share secret with these users" `.users` select, "Visible To All Orgs"
-toggle. **GUI bug frozen:** `EditSecretDialog` never copies the secret prop
-into `state.secret`, so the heading renders "Edit Secret " with an EMPTY
-name — the test asserts the title + share fields only.
+toggle. `EditSecretDialog` now copies the secret prop into `state.secret`
+(fixed on `fix-gui-quirks`), so the heading shows "Edit Secret <name>"; the
+test asserts the title + share fields.
 
 ---
 

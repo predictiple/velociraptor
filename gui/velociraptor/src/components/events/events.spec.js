@@ -55,9 +55,9 @@ const setMode = async (page, mode) => {
     .click();
 };
 
-// Artifact names containing "/" (e.g. Server.Monitor.Health/Prometheus) cannot
-// be deep-linked — the router treats the slash as the :time param — so select
-// them via the dropdown instead.
+// Artifact names containing "/" (e.g. Server.Monitor.Health/Prometheus) are
+// URL-encoded by the GUI (encodeURIComponent) so they can be deep-linked;
+// selecting them via the dropdown still works too.
 const selectArtifact = async (page, name) => {
   await page.locator(".event-artifacts").click();
   await page.locator(".velo__option", { hasText: name }).click();
@@ -116,6 +116,22 @@ test.describe("Server Events view", () => {
     await expect(page.locator(".event-report-viewer .paged-table tbody tr")).toHaveCount(10);
   });
 
+  test("deep link to a slash-named artifact renders its event table", async ({ page }) => {
+    // Server.Monitor.Health/Prometheus contains a "/" which the GUI URL-encodes
+    // (%2F) so the router does not split it into the :time param.
+    await page.goto(
+      "/app/index.html?org_id=root#/events/server/Server.Monitor.Health%2FPrometheus"
+    );
+
+    // The select shows the selected artifact (decoded back to its real name).
+    await expect(page.locator(".event-artifacts .velo__single-value")).toHaveText(
+      "Server.Monitor.Health/Prometheus"
+    );
+
+    // Timeline renders.
+    await expect(page.locator(".react-calendar-timeline")).toHaveCount(1);
+  });
+
   test("selecting an artifact via the dropdown updates the URL and renders its table", async ({
     page,
   }) => {
@@ -126,9 +142,10 @@ test.describe("Server Events view", () => {
       .locator(".velo__option", { hasText: "Server.Monitor.Health/Prometheus" })
       .click();
 
-    // URL gains the artifact path (the slash is part of the artifact name).
+    // URL gains the artifact path — the slash is part of the artifact name
+    // so the GUI URL-encodes it (%2F) to keep the route intact.
     await expect(page).toHaveURL(
-      /#\/events\/server\/Server\.Monitor\.Health\/Prometheus/
+      /#\/events\/server\/Server\.Monitor\.Health%2FPrometheus/
     );
     await expect(page.locator(".event-artifacts .velo__single-value")).toHaveText(
       "Server.Monitor.Health/Prometheus"

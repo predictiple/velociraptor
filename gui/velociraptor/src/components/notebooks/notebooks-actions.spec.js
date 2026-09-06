@@ -44,10 +44,8 @@ test.describe.serial("Notebook action toolbar", () => {
   });
 
   test("Copy Notebook opens the New Notebook wizard prefilled with the notebook name", async ({ page }) => {
-    // The Copy button's sr-only text is also "New Notebook" (copy-paste bug
-    // in notebooks-list.jsx) — the toolbar has two buttons with that name.
-    const copyButton = page.locator("nav.toolbar button", { hasText: "New Notebook" }).nth(1);
-    await copyButton.click();
+    // The Copy button's sr-only text and tooltip are now "Copy Notebook".
+    await page.locator("nav.toolbar button", { hasText: "Copy Notebook" }).click();
 
     await expect(page.getByText("New Notebook: Configure Parameters").first()).toBeVisible();
     // The name field is prefilled with the source notebook's name.

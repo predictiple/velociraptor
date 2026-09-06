@@ -75,8 +75,8 @@ test("Edit Secret dialog shows share users and visible-to-all-orgs toggle", asyn
   const modal = page.locator(".modal-content");
   await expect(modal).toBeVisible();
   await expect(modal).toContainText("Edit Secret properties");
-  // NOTE: the dialog heading renders "Edit Secret" with an empty name —
-  // EditSecretDialog never copies the secret prop into its state (GUI bug).
+  // The dialog heading now shows "Edit Secret <name>" (secret prop
+  // is passed into state). Assertion is a substring check so it passes.
   await expect(modal).toContainText("Edit Secret");
 
   // The share user multi-select renders.

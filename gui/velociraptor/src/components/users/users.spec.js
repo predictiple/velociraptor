@@ -152,8 +152,7 @@ test.describe("Users view", () => {
 
   test("Add User dialog opens with username input", async ({ page }) => {
     await page.locator("button.new-user-btn", { hasText: "Add a new user" }).click();
-    // The modal title is "Add a new  User" (double space in the i18n key);
-    // getByText normalizes whitespace so scope to the modal title.
+    // The modal title is "Add a new User".
     await expect(page.locator(".modal-title", { hasText: "Add a new" })).toBeVisible();
     await expect(page.getByPlaceholder("Enter a username")).toBeVisible();
     await expect(page.getByRole("button", { name: "Do it!" })).toBeVisible();
