@@ -35,15 +35,9 @@ test.beforeAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html?org_id=root#/collected/server");
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const headers = {
-    "X-CSRF-Token": csrf,
-    Referer: "https://localhost:8889/app/index.html",
-  };
 
   // Launch a fast read-only server collection.
   const launch = await page.request.post("/api/v1/CollectArtifact", {
-    headers,
     data: {
       client_id: "server",
       artifacts: ["Server.Information.Users"],
@@ -76,13 +70,7 @@ test.afterAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html?org_id=root#/collected/server");
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const headers = {
-    "X-CSRF-Token": csrf,
-    Referer: "https://localhost:8889/app/index.html",
-  };
   await page.request.post("/api/v1/CollectArtifact", {
-    headers,
     data: {
       client_id: "server",
       artifacts: ["Server.Utils.DeleteFlow"],

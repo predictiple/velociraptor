@@ -37,15 +37,9 @@ test.beforeAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html?org_id=root#/hunts");
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const headers = {
-    "X-CSRF-Token": csrf,
-    Referer: "https://localhost:8889/app/index.html",
-  };
 
   // Create a PAUSED hunt (no start flag) so it never runs on a client.
   const create = await page.request.post("/api/v1/CreateHunt", {
-    headers,
     data: {
       start_request: {
         artifacts: ["Generic.Client.Info"],
@@ -61,7 +55,6 @@ test.beforeAll(async ({ browser }) => {
 
   // Tag it so the tag-filter test has something to click.
   const tag = await page.request.post("/api/v1/ModifyHunt", {
-    headers,
     data: { hunt_id: huntId, tags: [TAG] },
   });
   expect(tag.status()).toBe(200);
@@ -77,13 +70,7 @@ test.afterAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html?org_id=root#/hunts");
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const headers = {
-    "X-CSRF-Token": csrf,
-    Referer: "https://localhost:8889/app/index.html",
-  };
   await page.request.post("/api/v1/CollectArtifact", {
-    headers,
     data: {
       client_id: "server",
       artifacts: ["Server.Hunts.CancelAndDelete"],

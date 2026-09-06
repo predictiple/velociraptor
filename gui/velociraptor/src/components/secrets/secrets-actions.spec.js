@@ -33,13 +33,7 @@ test.beforeAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html?org_id=root#/secrets");
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const headers = {
-    "X-CSRF-Token": csrf,
-    Referer: "https://localhost:8889/app/index.html",
-  };
   const add = await page.request.post("/api/v1/AddSecret", {
-    headers,
     data: {
       name: SECRET_NAME,
       type_name: "SMTP Creds",
@@ -58,13 +52,7 @@ test.afterAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html?org_id=root#/secrets");
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const headers = {
-    "X-CSRF-Token": csrf,
-    Referer: "https://localhost:8889/app/index.html",
-  };
   await page.request.post("/api/v1/ModifySecret", {
-    headers,
     data: { type_name: "SMTP Creds", name: SECRET_NAME, delete: true },
   });
   await context.close();

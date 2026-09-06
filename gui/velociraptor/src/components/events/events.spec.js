@@ -28,10 +28,8 @@ test.use({
 
 // The event notebook is auto-created by Notebook mode; remove it afterwards.
 test.afterAll(async ({ browser }) => {
-  // The standalone request fixture has its own cookie jar, but the CSRF token
-  // is session-bound — so create a real browser context, load the app to get
-  // the session cookie + token, and delete via context.request (which shares
-  // the context's cookies).
+  // Delete the auto-created notebook via context.request (shares the
+  // context's cookies + Basic auth).
   const context = await browser.newContext({
     extraHTTPHeaders: {
       Authorization: "Basic " + Buffer.from("admin:password").toString("base64"),
@@ -39,12 +37,7 @@ test.afterAll(async ({ browser }) => {
   });
   const page = await context.newPage();
   await page.goto("/app/index.html");
-  const csrf = await page.evaluate(() => window.CsrfToken);
   await context.request.post("/api/v1/DeleteNotebook", {
-    headers: {
-      "X-CSRF-Token": csrf,
-      Referer: "https://localhost:8889/app/index.html",
-    },
     data: { notebook_id: "N.E.Server.Audit.Logs-server" },
   });
   await context.close();

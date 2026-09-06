@@ -116,7 +116,14 @@ E2E:  `src/components/events/event-lifecycle.spec.js` (1 test)
 - Notebook mode auto-creates `N.E.<artifact>-server`; delete it in afterAll via `DeleteNotebook`.
 - `max_upload_bytes` in GetServerMonitoringState is computed server-side (default 1GB, `launcher.go`), not stored config — wizard launch is safe.
 - `Server.Internal.ArtifactModification` is a built-in, NOT in the SERVER_EVENT artifact store search — not usable in lifecycle tests; `Server.Monitoring.ClientCount` is.
-- **CSRF on API POSTs:** the standalone Playwright `request` fixture has its own cookie jar, but the CSRF token is session-bound — POSTs through it return `403 Forbidden - CSRF token invalid`. Use `page.request` (shares page cookies) with `X-CSRF-Token` from `window.CsrfToken` AND a `Referer: https://localhost:8889/app/index.html` header (gorilla/csrf SameSite Strict rejects requests without a referer).
+- **CSRF is disabled on the test server (requirement):** run the server with
+  `VELOCIRAPTOR_DISABLE_CSRF=1` (see `gui/velociraptor/README.md`); the specs
+  make API calls with no CSRF headers. If you must test against a server with
+  CSRF enabled, API POSTs need `page.request`/`context.request` (shares the
+  session cookie jar — a standalone `request` fixture returns
+  `403 Forbidden - CSRF token invalid`) with `X-CSRF-Token` from
+  `window.CsrfToken` AND a `Referer: https://localhost:8889/app/index.html`
+  header (gorilla/csrf SameSite Strict rejects requests without a referer).
 - **DeleteEvents cleanup:** `Server.Utils.DeleteEvents` (the `delete_events` VQL plugin → `launcher.DeleteEvents`) removes both row and log files, but only reliably once the monitoring table is back to baseline — otherwise the collector recreates the log file. Restore baseline first, poll until the collector stops, then delete and poll `ListAvailableEventResults` until the artifact disappears.
 
 ---

@@ -38,24 +38,16 @@ const monitoringArtifacts = async (request) => {
   return state.artifacts || [];
 };
 
-const availableEventArtifacts = async (request, csrf) => {
+const availableEventArtifacts = async (request) => {
   const resp = await request.post("/api/v1/ListAvailableEventResults", {
-    headers: {
-      "X-CSRF-Token": csrf,
-      Referer: "https://localhost:8889/app/index.html",
-    },
     data: { client_id: "server" },
   });
   const state = await resp.json();
   return (state.logs || []).map((l) => l.artifact);
 };
 
-const deleteClientCountEvents = async (request, csrf) => {
+const deleteClientCountEvents = async (request) => {
   await request.post("/api/v1/CollectArtifact", {
-    headers: {
-      "X-CSRF-Token": csrf,
-      Referer: "https://localhost:8889/app/index.html",
-    },
     data: {
       client_id: "server",
       allow_custom_overrides: true,
@@ -80,18 +72,12 @@ const deleteClientCountEvents = async (request, csrf) => {
 };
 
 test.afterEach(async ({ page }) => {
-  const csrf = await page.evaluate(() => window.CsrfToken);
-
   // 1. Restore the baseline monitoring table FIRST so the collector stops
   //    writing Server.Monitoring.ClientCount rows/logs before we delete them.
   const names = await monitoringArtifacts(page.request);
   const baseline = BASELINE.artifacts;
   if (names.length !== baseline.length || !baseline.every((n) => names.includes(n))) {
     await page.request.post("/api/v1/SetServerMonitoringState", {
-      headers: {
-        "X-CSRF-Token": csrf,
-        Referer: "https://localhost:8889/app/index.html",
-      },
       data: BASELINE,
     });
     // Wait for the table change to propagate so the collector stops writing.
@@ -108,9 +94,9 @@ test.afterEach(async ({ page }) => {
   await expect
     .poll(
       async () => {
-        await deleteClientCountEvents(page.request, csrf);
+        await deleteClientCountEvents(page.request);
         await page.waitForTimeout(4000);
-        return (await availableEventArtifacts(page.request, csrf)).includes(
+        return (await availableEventArtifacts(page.request)).includes(
           "Server.Monitoring.ClientCount"
         );
       },

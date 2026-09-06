@@ -66,10 +66,7 @@ test("secret lifecycle: add, inspect, delete", async ({ page }) => {
   await expect(deleteModal).toHaveCount(0);
 
   // Verify secret is deleted via API
-  const csrf = await page.evaluate(() => window.CsrfToken);
-  const resp = await page.request.get("/api/v1/GetSecretDefinitions", {
-    headers: { "X-CSRF-Token": csrf, Referer: "https://localhost:8889/app/index.html" },
-  });
+  const resp = await page.request.get("/api/v1/GetSecretDefinitions");
   expect(resp.status()).toBe(200);
   const body = await resp.json();
   const smtpDef = (body.items || []).find((i) => i.type_name === "SMTP Creds");
