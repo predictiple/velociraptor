@@ -33,10 +33,9 @@ test.beforeEach(async ({ page }) => {
 test.describe.serial("Notebook action toolbar", () => {
   test("Full Screen navigates to the fullscreen notebook view", async ({ page }) => {
     const notebookId = (await page
-      .locator("table.paged-table tbody tr.row-selected")
+      .locator("table.paged-table tbody tr.row-selected td")
+      .first()
       .innerText())
-      .trim()
-      .split("\t")[0]
       .trim();
 
     await page.locator("nav.toolbar button", { hasText: "Full Screen" }).click();
@@ -59,10 +58,9 @@ test.describe.serial("Notebook action toolbar", () => {
 
   test("Edit Notebook opens the edit dialog with the notebook id in the title", async ({ page }) => {
     const notebookId = (await page
-      .locator("table.paged-table tbody tr.row-selected")
+      .locator("table.paged-table tbody tr.row-selected td")
+      .first()
       .innerText())
-      .trim()
-      .split("\t")[0]
       .trim();
 
     await page.locator("nav.toolbar button", { hasText: "Edit Notebook" }).click();
@@ -76,10 +74,9 @@ test.describe.serial("Notebook action toolbar", () => {
 
   test("Notebook Uploads opens the uploads dialog", async ({ page }) => {
     const notebookName = (await page
-      .locator("table.paged-table tbody tr.row-selected")
+      .locator("table.paged-table tbody tr.row-selected td")
+      .nth(1)
       .innerText())
-      .trim()
-      .split("\t")[1]
       .trim();
 
     await page.locator("nav.toolbar button", { hasText: "Notebook Uploads" }).click();

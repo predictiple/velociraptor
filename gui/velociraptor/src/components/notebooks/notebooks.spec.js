@@ -84,7 +84,7 @@ test.describe("Notebooks view", () => {
   test("row click loads the notebook and navigates to its URL", async ({ page }) => {
     const rows = page.locator("table.paged-table tbody tr");
     const firstRow = rows.first();
-    const notebookId = (await firstRow.innerText()).trim().split("\t")[0].trim();
+    const notebookId = (await firstRow.locator("td").first().innerText()).trim();
     await firstRow.locator("td").first().click();
 
     await expect(page).toHaveURL(new RegExp(`#/notebooks/${notebookId}`));

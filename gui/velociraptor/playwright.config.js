@@ -59,5 +59,17 @@ export default defineConfig({
           }
         : { ...devices["Desktop Chrome"] },
     },
+    {
+      // Requires `npx playwright install firefox` (Playwright's bundled
+      // Firefox). Run with: npx playwright test --project=firefox
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      // Requires `npx playwright install webkit` (Playwright's bundled
+      // WebKit). Run with: npx playwright test --project=webkit
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
   ],
 });

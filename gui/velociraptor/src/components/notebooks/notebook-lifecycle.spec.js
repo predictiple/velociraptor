@@ -83,7 +83,7 @@ test("notebook lifecycle: create, add VQL cell, run, delete", async ({ page }) =
   // --- The new notebook appears as the first row (newest first) ---
   const rows = page.locator("table.paged-table tbody tr");
   await expect(rows.first()).toContainText("New Notebook");
-  const notebookId = (await rows.first().innerText()).trim().split("\t")[0].trim();
+  const notebookId = (await rows.first().locator("td").first().innerText()).trim();
   expect(notebookId).toMatch(/^N\./);
 
   // --- Open it: the template's markdown welcome cell renders ---

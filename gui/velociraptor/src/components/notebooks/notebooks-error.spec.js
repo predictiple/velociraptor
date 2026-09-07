@@ -79,7 +79,7 @@ test("invalid VQL in a notebook cell renders an error message", async ({ page })
   // --- Open the new notebook (first row, newest first) ---
   const rows = page.locator("table.paged-table tbody tr");
   await expect(rows.first()).toContainText("New Notebook");
-  const notebookId = (await rows.first().innerText()).trim().split("\t")[0].trim();
+  const notebookId = (await rows.first().locator("td").first().innerText()).trim();
   expect(notebookId).toMatch(/^N\./);
   await rows.first().locator("td").first().click();
   await expect(page).toHaveURL(new RegExp(`#/notebooks/${notebookId}`));
