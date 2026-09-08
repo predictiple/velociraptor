@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Velocidex/ordereddict"
@@ -14,8 +13,9 @@ import (
 
 // Test that the hostname transform works when the response is
 // compressed by the launcher (the default for newer clients). The
-// transform must decompress the payload, apply the change and
-// re-compress it so the server can still decode it.
+// transform must decompress the payload, apply the change and return
+// the result uncompressed - the server falls back to handling
+// uncompressed data.
 func TestMaybeTransformResponseCompressed(t *testing.T) {
 	rows := []*ordereddict.Dict{
 		ordereddict.NewDict().
@@ -37,16 +37,13 @@ func TestMaybeTransformResponseCompressed(t *testing.T) {
 	result := maybeTransformResponse(response, 42)
 	require.NotNil(t, result)
 
-	// The result must remain compressed.
-	assert.Empty(t, result.JSONLResponse)
-	assert.NotEmpty(t, result.CompressedJsonResponse)
-	assert.Equal(t, uint64(len(jsonl)), result.UncompressedSize)
+	// The result must be uncompressed.
+	assert.NotEmpty(t, result.JSONLResponse)
+	assert.Empty(t, result.CompressedJsonResponse)
+	assert.Equal(t, uint64(0), result.UncompressedSize)
 
-	decompressed, err := utils.Uncompress(
-		context.Background(), result.CompressedJsonResponse)
-	require.NoError(t, err)
-
-	transformed_rows, err := utils.ParseJsonToDicts(decompressed)
+	transformed_rows, err := utils.ParseJsonToDicts(
+		[]byte(result.JSONLResponse))
 	require.NoError(t, err)
 	require.Len(t, transformed_rows, 1)
 

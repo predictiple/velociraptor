@@ -128,8 +128,7 @@ func maybeTransformResponse(response *actions_proto.VQLResponse, id int) *action
 			// case the JSONL payload is stored in
 			// CompressedJsonResponse and JSONLResponse is empty.
 			jsonl := response.JSONLResponse
-			compressed := len(response.CompressedJsonResponse) > 0
-			if jsonl == "" && compressed {
+			if jsonl == "" && len(response.CompressedJsonResponse) > 0 {
 				decompressed, err := utils.Uncompress(
 					context.Background(), response.CompressedJsonResponse)
 				if err != nil {
@@ -159,19 +158,12 @@ func maybeTransformResponse(response *actions_proto.VQLResponse, id int) *action
 			}
 			result := proto.Clone(response).(*actions_proto.VQLResponse)
 
-			// Preserve the compression state of the original
-			// response so the server can still decode it.
-			if compressed {
-				compressed_rows, err := utils.Compress(new_rows)
-				if err != nil {
-					return response
-				}
-				result.CompressedJsonResponse = compressed_rows
-				result.UncompressedSize = uint64(len(new_rows))
-				result.JSONLResponse = ""
-			} else {
-				result.JSONLResponse = string(new_rows)
-			}
+			// The server falls back to handling uncompressed data so
+			// just clear the compressed field and pass the
+			// transformed rows uncompressed.
+			result.JSONLResponse = string(new_rows)
+			result.CompressedJsonResponse = nil
+			result.UncompressedSize = 0
 
 			return result
 		}
