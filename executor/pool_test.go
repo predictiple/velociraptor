@@ -1,0 +1,116 @@
+package executor
+
+import (
+	"context"
+	"testing"
+
+	"github.com/Velocidex/ordereddict"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	actions_proto "www.velocidex.com/golang/velociraptor/actions/proto"
+	"www.velocidex.com/golang/velociraptor/json"
+	"www.velocidex.com/golang/velociraptor/utils"
+)
+
+// Test that the hostname transform works when the response is
+// compressed by the launcher (the default for newer clients). The
+// transform must decompress the payload, apply the change and
+// re-compress it so the server can still decode it.
+func TestMaybeTransformResponseCompressed(t *testing.T) {
+	rows := []*ordereddict.Dict{
+		ordereddict.NewDict().
+			Set("Hostname", "testhost").
+			Set("Fqdn", "testhost.local"),
+	}
+	jsonl, err := json.MarshalJsonl(rows)
+	require.NoError(t, err)
+
+	compressed, err := utils.Compress(jsonl)
+	require.NoError(t, err)
+
+	response := &actions_proto.VQLResponse{
+		Columns:                []string{"Hostname", "Fqdn"},
+		CompressedJsonResponse: compressed,
+		UncompressedSize:       uint64(len(jsonl)),
+	}
+
+	result := maybeTransformResponse(response, 42)
+	require.NotNil(t, result)
+
+	// The result must remain compressed.
+	assert.Empty(t, result.JSONLResponse)
+	assert.NotEmpty(t, result.CompressedJsonResponse)
+	assert.Equal(t, uint64(len(jsonl)), result.UncompressedSize)
+
+	decompressed, err := utils.Uncompress(
+		context.Background(), result.CompressedJsonResponse)
+	require.NoError(t, err)
+
+	transformed_rows, err := utils.ParseJsonToDicts(decompressed)
+	require.NoError(t, err)
+	require.Len(t, transformed_rows, 1)
+
+	hostname, pres := transformed_rows[0].GetString("Hostname")
+	require.True(t, pres)
+	assert.Equal(t, "testhost-42", hostname)
+
+	fqdn, pres := transformed_rows[0].GetString("Fqdn")
+	require.True(t, pres)
+	assert.Equal(t, "testhost-42", fqdn)
+}
+
+// Test that the hostname transform still works on uncompressed
+// responses (older clients).
+func TestMaybeTransformResponseUncompressed(t *testing.T) {
+	rows := []*ordereddict.Dict{
+		ordereddict.NewDict().
+			Set("Hostname", "testhost").
+			Set("Fqdn", "testhost.local"),
+	}
+	jsonl, err := json.MarshalJsonl(rows)
+	require.NoError(t, err)
+
+	response := &actions_proto.VQLResponse{
+		Columns:       []string{"Hostname", "Fqdn"},
+		JSONLResponse: string(jsonl),
+	}
+
+	result := maybeTransformResponse(response, 7)
+	require.NotNil(t, result)
+
+	// The result must remain uncompressed.
+	assert.Empty(t, result.CompressedJsonResponse)
+	assert.NotEmpty(t, result.JSONLResponse)
+
+	transformed_rows, err := utils.ParseJsonToDicts(
+		[]byte(result.JSONLResponse))
+	require.NoError(t, err)
+	require.Len(t, transformed_rows, 1)
+
+	hostname, pres := transformed_rows[0].GetString("Hostname")
+	require.True(t, pres)
+	assert.Equal(t, "testhost-7", hostname)
+}
+
+// Test that responses without a Hostname column are returned
+// unchanged.
+func TestMaybeTransformResponseNoHostname(t *testing.T) {
+	rows := []*ordereddict.Dict{
+		ordereddict.NewDict().Set("Foo", "bar"),
+	}
+	jsonl, err := json.MarshalJsonl(rows)
+	require.NoError(t, err)
+
+	compressed, err := utils.Compress(jsonl)
+	require.NoError(t, err)
+
+	response := &actions_proto.VQLResponse{
+		Columns:                []string{"Foo"},
+		CompressedJsonResponse: compressed,
+		UncompressedSize:       uint64(len(jsonl)),
+	}
+
+	result := maybeTransformResponse(response, 42)
+	require.NotNil(t, result)
+	assert.Equal(t, response, result)
+}
