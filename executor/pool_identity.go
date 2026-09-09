@@ -32,6 +32,12 @@ var (
 		"woody", "icy", "fiery", "electric", "magnetic", "atomic",
 		"orbital", "galactic", "nebular", "prismatic", "echoing",
 		"pulsing",
+		"cyber", "neon", "plasma", "photon", "binary", "chrome",
+		"silicon", "fractal", "vector", "pixel", "glitch", "static",
+		"sonic", "laser", "turbo", "hyper", "stealth", "tactical",
+		"infinite", "eternal", "arcane", "runic", "eldritch", "null",
+		"void", "zero", "temporal", "kinetic", "synthetic",
+		"holographic",
 	}
 
 	pool_nouns = []string{
@@ -46,6 +52,14 @@ var (
 		"voyage", "journey", "quest", "compass", "beacon",
 		"lighthouse", "anchor", "horizon", "summit", "peak", "ridge",
 		"canyon", "river", "ocean",
+		"robot", "android", "cyborg", "droid", "mech",
+		"singularity", "wormhole", "starship", "rocket", "probe",
+		"comet", "meteor", "asteroid", "nebula", "galaxy", "eclipse",
+		"aurora", "quasar", "pulsar", "nova", "zenith", "kernel",
+		"daemon", "proxy", "cipher", "firewall", "matrix", "node",
+		"basilisk", "chimera", "cerberus", "wyvern", "drake", "golem",
+		"paladin", "berserker", "gladiator", "archer", "renegade",
+		"nomad",
 	}
 )
 
