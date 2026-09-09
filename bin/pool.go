@@ -46,8 +46,12 @@ var (
 		"number", "Total number of clients to run.").Int()
 
 	pool_client_writeback_dir = pool_client_command.Flag(
-		"writeback_dir", "The directory to store all writebacks. "+
-			"If not specified, in-memory writebacks are used.").ExistingDir()
+		"writeback_dir", "The directory to store all writebacks.").Default(".").
+		ExistingDir()
+
+	pool_client_no_writeback = pool_client_command.Flag(
+		"no_writeback", "Use in-memory writebacks so client identities are ephemeral.").
+		Bool()
 
 	pool_client_concurrency = pool_client_command.Flag(
 		"concurrency", "How many real queries to run.").Default("10").Int()
@@ -74,6 +78,10 @@ func (self *counter) Inc() {
 
 func doPoolClient() error {
 	logging.DisableLogging()
+
+	if *pool_client_no_writeback && *pool_client_writeback_dir != "." {
+		return fmt.Errorf("--no_writeback and --writeback_dir are mutually exclusive")
+	}
 
 	number_of_clients := *pool_client_number
 	if number_of_clients <= 0 {
@@ -137,17 +145,18 @@ func doPoolClient() error {
 
 			client_config.Client.DisableCheckpoints = true
 
-			// Use an in-memory writeback so each client's identity is
-			// ephemeral and no files are written to disk. If the user
-			// specified a writeback directory, write the writebacks
-			// there instead so identities persist between runs.
-			if *pool_client_writeback_dir != "" {
+			// By default write the writebacks to the writeback
+			// directory so client identities persist between runs.
+			// If --no_writeback is specified, use an in-memory
+			// writeback so each client's identity is ephemeral and no
+			// files are written to disk.
+			if *pool_client_no_writeback {
+				client_config.Client.WritebackLinux = fmt.Sprintf(
+					"memory://pool_client.yaml.%d", i)
+			} else {
 				client_config.Client.WritebackLinux = path.Join(
 					*pool_client_writeback_dir,
 					fmt.Sprintf("pool_client.yaml.%d", i))
-			} else {
-				client_config.Client.WritebackLinux = fmt.Sprintf(
-					"memory://pool_client.yaml.%d", i)
 			}
 			client_config.Client.WritebackWindows = client_config.Client.WritebackLinux
 			client_config.Client.WritebackDarwin = client_config.Client.WritebackLinux
@@ -167,9 +176,9 @@ func doPoolClient() error {
 			}
 			client_config.Client.Concurrency = uint64(*pool_client_concurrency)
 
-			// Register the in-memory writeback with the writeback
-			// service. This generates a fresh private key and client
-			// id for this client.
+			// Register the writeback with the writeback service. This
+			// generates a fresh private key and client id for this
+			// client if no writeback exists yet.
 			writeback_service := writeback.GetWritebackService()
 			_ = writeback_service.LoadWriteback(client_config)
 
