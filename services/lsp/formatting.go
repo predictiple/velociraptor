@@ -2,7 +2,6 @@ package lsp
 
 import (
 	"context"
-	"strings"
 
 	"go.lsp.dev/protocol"
 	"www.velocidex.com/golang/vfilter"
@@ -15,11 +14,9 @@ func (self *LSPServer) Formatting(
 	ctx context.Context,
 	params *protocol.DocumentFormattingParams) ([]protocol.TextEdit, error) {
 
-	self.mu.Lock()
-	doc, pres := self.documents[params.TextDocument.URI]
-	self.mu.Unlock()
-	if !pres {
-		return nil, nil
+	doc, err := self.GetDoc(params.TextDocument.URI)
+	if err != nil {
+		return nil, err
 	}
 
 	formatted, err := formatVQL(doc.Text)
@@ -29,7 +26,7 @@ func (self *LSPServer) Formatting(
 	}
 
 	return []protocol.TextEdit{{
-		Range:   fullDocumentRange(doc.Text),
+		Range:   *protocolRange(doc.FullRange()),
 		NewText: formatted,
 	}}, nil
 }
@@ -43,20 +40,5 @@ func formatVQL(query string) (string, error) {
 		return "", err
 	}
 
-	return strings.TrimRight(formatted, " \n"), nil
-}
-
-// fullDocumentRange returns a range covering the entire document.
-func fullDocumentRange(document string) protocol.Range {
-	lines := strings.Split(document, "\n")
-	last_line := len(lines) - 1
-	last_char := len(lines[last_line])
-
-	return protocol.Range{
-		Start: protocol.Position{Line: 0, Character: 0},
-		End: protocol.Position{
-			Line:      uint32(last_line),
-			Character: uint32(last_char),
-		},
-	}
+	return formatted, nil
 }

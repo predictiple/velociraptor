@@ -126,6 +126,11 @@ Workspace symbols for query:
   "location": null
  },
  {
+  "name": "azure_monitor_upload",
+  "kind": 5,
+  "location": null
+ },
+ {
   "name": "background",
   "kind": 12,
   "location": null

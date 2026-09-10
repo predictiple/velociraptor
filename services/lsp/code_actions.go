@@ -15,11 +15,9 @@ func (self *LSPServer) CodeAction(
 	ctx context.Context,
 	params *protocol.CodeActionParams) ([]protocol.CommandOrCodeAction, error) {
 
-	self.mu.Lock()
-	doc, pres := self.documents[params.TextDocument.URI]
-	self.mu.Unlock()
-	if !pres {
-		return nil, utils.NotFoundError
+	doc, err := self.GetDoc(params.TextDocument.URI)
+	if err != nil {
+		return nil, err
 	}
 
 	actions := []protocol.CommandOrCodeAction{}
@@ -29,22 +27,17 @@ func (self *LSPServer) CodeAction(
 			continue
 		}
 
-		action := self.removeArgumentAction(
+		action, err := self.removeArgumentAction(
 			params.TextDocument.URI, doc, diag)
-		if action != nil {
+		if err == nil {
 			actions = append(actions, protocol.CommandOrCodeAction(action))
 		}
 	}
 
 	if actionKindRequested(params, protocol.CodeActionKindSource) {
-		action := self.formatDocumentAction(
+		action, err := self.formatDocumentAction(
 			params.TextDocument.URI, doc)
-
-		// A nil action (e.g. the document can not be formatted
-		// because it contains syntax errors) must not be appended -
-		// a null entry in the response array crashes editor
-		// clients when they convert the result.
-		if action != nil {
+		if err == nil {
 			actions = append(actions, action)
 		}
 	}
@@ -70,7 +63,7 @@ func isUnknownParameter(diag protocol.Diagnostic) bool {
 // argument from the call.
 func (self *LSPServer) removeArgumentAction(
 	doc_uri uri.URI, doc *Document,
-	diag protocol.Diagnostic) *protocol.CodeAction {
+	diag protocol.Diagnostic) (*protocol.CodeAction, error) {
 
 	// Find the argument in the analysis state whose position matches
 	// the diagnostic range.
@@ -85,9 +78,9 @@ func (self *LSPServer) removeArgumentAction(
 			// will do its best to clean up the leftover comma.
 			return &protocol.CodeAction{
 				Title:       "Remove unknown argument '" + arg.Name + "'",
-				Kind:        ptr(protocol.CodeActionKindQuickFix),
+				Kind:        new(protocol.CodeActionKindQuickFix),
 				Diagnostics: []protocol.Diagnostic{diag},
-				IsPreferred: ptr(true),
+				IsPreferred: new(true),
 				Edit: &protocol.WorkspaceEdit{
 					Changes: map[uri.URI][]protocol.TextEdit{
 						doc_uri: {{
@@ -96,36 +89,36 @@ func (self *LSPServer) removeArgumentAction(
 						}},
 					},
 				},
-			}
+			}, nil
 		}
 	}
 
-	return nil
+	return nil, utils.NotFoundError
 }
 
 // formatDocumentAction returns a source action which reformats the
 // whole document.
 func (self *LSPServer) formatDocumentAction(
-	doc_uri uri.URI, doc *Document) protocol.CommandOrCodeAction {
+	doc_uri uri.URI, doc *Document) (protocol.CommandOrCodeAction, error) {
 
 	formatted, err := formatVQL(doc.Text)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	action := &protocol.CodeAction{
 		Title: "Format document",
-		Kind:  ptr(protocol.CodeActionKindSource),
+		Kind:  new(protocol.CodeActionKindSource),
 		Edit: &protocol.WorkspaceEdit{
 			Changes: map[uri.URI][]protocol.TextEdit{
 				doc_uri: {{
-					Range:   fullDocumentRange(doc.Text),
+					Range:   *protocolRange(doc.FullRange()),
 					NewText: formatted,
 				}},
 			},
 		},
 	}
-	return protocol.CommandOrCodeAction(action)
+	return protocol.CommandOrCodeAction(action), nil
 }
 
 // actionKindRequested reports whether actions of the given kind
@@ -150,8 +143,4 @@ func rangesEqual(a, b protocol.Range) bool {
 		a.Start.Character == b.Start.Character &&
 		a.End.Line == b.End.Line &&
 		a.End.Character == b.End.Character
-}
-
-func ptr[T any](value T) *T {
-	return &value
 }

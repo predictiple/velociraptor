@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
+	"github.com/alecthomas/participle/v2/lexer"
 	"go.lsp.dev/protocol"
 	api_proto "www.velocidex.com/golang/velociraptor/api/proto"
-	"www.velocidex.com/golang/velociraptor/utils"
 	"www.velocidex.com/golang/vfilter"
 )
 
@@ -15,25 +15,23 @@ func (self *LSPServer) SignatureHelp(
 	ctx context.Context,
 	params *protocol.SignatureHelpParams) (*protocol.SignatureHelp, error) {
 
-	self.mu.Lock()
-	doc, pres := self.documents[params.TextDocument.URI]
-	self.mu.Unlock()
-	if !pres {
-		return nil, utils.NotFoundError
+	doc, err := self.GetDoc(params.TextDocument.URI)
+	if err != nil {
+		return nil, err
 	}
 
-	pos := lexerPositionFromProtocol(params.Position)
-	cs, offset_at_point, err := doc.matchCallsite(pos)
+	cursor := doc.LexerPositionFromProtocol(params.Position)
+	cs, err := doc.matchCallsite(cursor)
 	if err != nil {
 		return nil, nil
 	}
 
-	desc := doc.getVQLFunctionDescription(cs)
+	desc := doc.getVQLFunctionDescription(cs.Name, cs.Type)
 	if desc == nil {
 		return nil, nil
 	}
 
-	return buildSignatureHelp(desc, cs, offset_at_point)
+	return buildSignatureHelp(desc, cs, cursor)
 }
 
 // buildSignatureHelp renders the description as a signature and
@@ -41,7 +39,7 @@ func (self *LSPServer) SignatureHelp(
 func buildSignatureHelp(
 	desc *api_proto.Completion,
 	cs *vfilter.CallSite,
-	offset_at_point int) (*protocol.SignatureHelp, error) {
+	cursor *lexer.Position) (*protocol.SignatureHelp, error) {
 
 	signature := protocol.SignatureInformation{
 		Label: buildSignatureLabel(desc),
@@ -73,7 +71,7 @@ func buildSignatureHelp(
 	// cursor, otherwise fall back to the next free slot.
 	active_name := ""
 	for _, arg := range cs.Args {
-		if arg.Pos.Pos.Offset > 0 && arg.Pos.Pos.Offset > offset_at_point {
+		if arg.Pos.Pos.Offset > 0 && arg.Pos.Pos.Offset > cursor.Offset {
 			break
 		}
 		active_name = arg.Name

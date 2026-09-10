@@ -34,7 +34,7 @@ func (self *LSPServer) Initialize(
 			// not parse yet so signature help can not fire for them
 			// and the two popups never overlap in practice.
 			CompletionProvider: &protocol.CompletionOptions{
-				TriggerCharacters: []string{".", "(", "?"},
+				TriggerCharacters: []string{".", "("},
 			},
 
 			// The server provides semantic highlighting.
@@ -68,6 +68,9 @@ func (self *LSPServer) Initialize(
 
 			// The server provides rename.
 			RenameProvider: protocol.Boolean(true),
+
+			// The server provides inlay hints.
+			InlayHintProvider: protocol.Boolean(true),
 		},
 		ServerInfo: protocol.ServerInfo{
 			Name:    "vql-lsp",

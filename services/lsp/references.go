@@ -5,9 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/alecthomas/participle/v2/lexer"
 	"go.lsp.dev/protocol"
-	"www.velocidex.com/golang/velociraptor/utils"
 	vql_subsystem "www.velocidex.com/golang/velociraptor/vql"
 	"www.velocidex.com/golang/vfilter"
 )
@@ -20,21 +18,14 @@ func (self *LSPServer) References(
 	ctx context.Context,
 	params *protocol.ReferenceParams) ([]protocol.Location, error) {
 
-	self.mu.Lock()
-	doc, pres := self.documents[params.TextDocument.URI]
-	self.mu.Unlock()
-	if !pres {
-		return nil, utils.NotFoundError
-	}
-
-	pos := lexerPositionFromProtocol(params.Position)
-	offset_at_point, err := getNextOffset(doc.Text,
-		lexer.Position{Line: 1, Column: 1, Offset: 0}, pos)
+	doc, err := self.GetDoc(params.TextDocument.URI)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
-	name := wordAtOffset(doc.Text, offset_at_point)
+	cursor := doc.LexerPositionFromProtocol(params.Position)
+	rng := doc.WordAtPos(*cursor, ' ')
+	name := doc.GetFragmentByRange(rng)
 	if name == "" {
 		return nil, nil
 	}

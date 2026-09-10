@@ -12,10 +12,10 @@
       },
       "end": {
        "line": 0,
-       "character": 27
+       "character": 26
       }
      },
-     "newText": "SELECT *\nFROM pslist(pid=1)"
+     "newText": "SELECT *\nFROM pslist(pid=1)\n\n"
     }
    ]
   }

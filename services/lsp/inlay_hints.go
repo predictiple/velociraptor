@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"go.lsp.dev/protocol"
-	"www.velocidex.com/golang/velociraptor/utils"
 )
 
 // InlayHint returns the types of the named arguments in the document.
@@ -15,16 +14,14 @@ func (self *LSPServer) InlayHint(
 	ctx context.Context,
 	params *protocol.InlayHintParams) ([]protocol.InlayHint, error) {
 
-	self.mu.Lock()
-	doc, pres := self.documents[params.TextDocument.URI]
-	self.mu.Unlock()
-	if !pres {
-		return nil, utils.NotFoundError
+	doc, err := self.GetDoc(params.TextDocument.URI)
+	if err != nil {
+		return nil, err
 	}
 
 	res := []protocol.InlayHint{}
 	for _, cs := range doc.AnalysisState.Callsites {
-		desc := doc.getVQLFunctionDescription(&cs)
+		desc := doc.getVQLFunctionDescription(cs.Name, cs.Type)
 		if desc == nil {
 			continue
 		}

@@ -1,38 +1,22 @@
 Diagnostics after valid change:
 []
 Diagnostics after broken change:
-[
- {
-  "range": {
-   "start": {
-    "line": 0,
-    "character": 28
-   },
-   "end": {
-    "line": 0,
-    "character": 28
-   }
-  },
-  "severity": 1,
-  "source": "vql",
-  "message": "(1,29) Generic Error: lexer: invalid input text \"?\""
- }
-]
+[]
 Completions after broken change:
 [
  {
-  "label": "globs",
+  "label": "root",
   "labelDetails": {
-   "detail": ": string",
-   "description": "One or more glob patterns to apply to the filesystem."
+   "detail": "root",
+   "description": "The root directory to glob from (default '')."
   },
   "kind": 6,
-  "detail": "glob arg",
+  "detail": "Plugin arg",
   "documentation": {
-   "kind": "markdown",
-   "value": "Type: `string`\n\nOne or more glob patterns to apply to the filesystem."
+   "kind": "plaintext",
+   "value": "The root directory to glob from (default '')."
   },
-  "filterText": "globs",
+  "filterText": "glob",
   "textEdit": {
    "range": {
     "start": {
@@ -41,40 +25,93 @@ Completions after broken change:
     },
     "end": {
      "line": 0,
-     "character": 22
+     "character": 24
     }
    },
-   "newText": "globs="
+   "newText": "root="
+  }
+ },
+ {
+  "label": "nosymlink",
+  "labelDetails": {
+   "detail": "nosymlink",
+   "description": "If set we do not follow symlinks."
+  },
+  "kind": 6,
+  "detail": "Plugin arg",
+  "documentation": {
+   "kind": "plaintext",
+   "value": "If set we do not follow symlinks."
+  },
+  "filterText": "glob",
+  "textEdit": {
+   "range": {
+    "start": {
+     "line": 0,
+     "character": 19
+    },
+    "end": {
+     "line": 0,
+     "character": 24
+    }
+   },
+   "newText": "nosymlink="
+  }
+ },
+ {
+  "label": "recursion_callback",
+  "labelDetails": {
+   "detail": "recursion_callback",
+   "description": "A VQL function that determines if a directory should be recursed (e.g. \"x=>NOT x.Name =~ 'proc'\")."
+  },
+  "kind": 6,
+  "detail": "Plugin arg",
+  "documentation": {
+   "kind": "plaintext",
+   "value": "A VQL function that determines if a directory should be recursed (e.g. \"x=>NOT x.Name =~ 'proc'\")."
+  },
+  "filterText": "glob",
+  "textEdit": {
+   "range": {
+    "start": {
+     "line": 0,
+     "character": 19
+    },
+    "end": {
+     "line": 0,
+     "character": 24
+    }
+   },
+   "newText": "recursion_callback="
+  }
+ },
+ {
+  "label": "one_filesystem",
+  "labelDetails": {
+   "detail": "one_filesystem",
+   "description": "If set we do not follow links to other filesystems."
+  },
+  "kind": 6,
+  "detail": "Plugin arg",
+  "documentation": {
+   "kind": "plaintext",
+   "value": "If set we do not follow links to other filesystems."
+  },
+  "filterText": "glob",
+  "textEdit": {
+   "range": {
+    "start": {
+     "line": 0,
+     "character": 19
+    },
+    "end": {
+     "line": 0,
+     "character": 24
+    }
+   },
+   "newText": "one_filesystem="
   }
  }
 ]
 Completions after broken multi-statement change:
-[
- {
-  "label": "pid",
-  "labelDetails": {
-   "detail": ": int64",
-   "description": "A process ID to list. If not provided list all processes."
-  },
-  "kind": 6,
-  "detail": "pslist arg",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Type: `int64`\n\nA process ID to list. If not provided list all processes."
-  },
-  "filterText": "pid",
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 1,
-     "character": 21
-    },
-    "end": {
-     "line": 1,
-     "character": 22
-    }
-   },
-   "newText": "pid="
-  }
- }
-]
+[]

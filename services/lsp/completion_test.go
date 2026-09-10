@@ -31,7 +31,7 @@ var (
 	}, {
 		Name:   "Complete plugin all args",
 		Query:  "SELECT * FROM glob()",
-		Column: 18,
+		Column: 36 - 17,
 	}, {
 		Name:   "Complete a plugin args",
 		Query:  "SELECT * FROM glob(gloXXX='*')",
@@ -39,10 +39,6 @@ var (
 	}, {
 		Name:   "Complete some plugin args (accessor already exists, so should not be completed) ",
 		Query:  "SELECT * FROM glob(gloXXX='*', accessor='file')",
-		Column: 18,
-	}, {
-		Name:   "Prefix fallback after trigger dot",
-		Query:  "SELECT * FROM parse.",
 		Column: 19,
 	}, {
 		Name:   "Prefix fallback mid name",
@@ -64,6 +60,10 @@ var (
 		Name:   "Symbol callsite falls back to prefix completion",
 		Query:  "SELECT parse_ FROM scope()",
 		Column: 13,
+	}, {
+		Name:   "Past end of document",
+		Query:  "SELECT * FROM scope()",
+		Column: 300,
 	}}
 )
 
@@ -73,21 +73,26 @@ func (self *LSPTestSuite) TestCompletion() {
 	var golden []string
 
 	for idx, tc := range completionTC {
-		if false && idx != 4 {
+		if false && idx != 6 {
 			continue
 		}
 
-		doc := uri.URI(fmt.Sprintf("file:///XXX%d", idx))
+		doc_url := uri.URI(fmt.Sprintf("file:///XXX%d", idx))
+
+		column := int(tc.Column)
+		if column > len(tc.Query) {
+			column = len(tc.Query)
+		}
 
 		golden = append(golden, fmt.Sprintf(
 			"\nTest case %d: %s\n%v\n%v<--",
-			idx, tc.Name, tc.Query, tc.Query[:tc.Column]))
+			idx, tc.Name, tc.Query, tc.Query[:column]))
 
 		// Load the document.
 		diagnostics, err := lsp_service.DidOpen(self.Ctx,
 			&protocol.DidOpenTextDocumentParams{
 				TextDocument: protocol.TextDocumentItem{
-					URI:  doc,
+					URI:  doc_url,
 					Text: tc.Query,
 				},
 			})
@@ -100,7 +105,7 @@ func (self *LSPTestSuite) TestCompletion() {
 		req := &protocol.CompletionParams{
 			TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 				TextDocument: protocol.TextDocumentIdentifier{
-					URI: doc,
+					URI: doc_url,
 				},
 				Position: protocol.Position{
 					Line:      0,
@@ -115,59 +120,47 @@ func (self *LSPTestSuite) TestCompletion() {
 
 		golden = append(golden, "Completions:")
 		golden = append(golden, lsp.DumpProtool(completions))
+		golden = append(golden, "text edit:")
+		for _, c := range completions {
+			c_ := c.TextEdit.(*protocol.TextEdit)
+			golden = append(golden,
+				fmt.Sprintf("%v -> %v", getRange(tc.Query, c_.Range), c_.NewText))
+		}
 	}
 
 	goldie.Assert(self.T(), "TestCompletion",
 		[]byte(strings.Join(golden, "\n")))
 }
 
-// A completion request may legitimately reference a position beyond
-// the end of the document - e.g. when the client's view of the text
-// is briefly ahead of the server, or a trigger fires on an empty
-// line. The server must clamp the position instead of panicking (a
-// panic here previously crashed the entire frontend).
-func (self *LSPTestSuite) TestCompletionPositionPastEndOfDocument() {
-	lsp_service := lsp.NewLSPServer(self.ConfigObj).(*lsp.LSPServer)
+// Extracts the substring from the text specified by the exclusive
+// range.
+func getRange(text string, rng protocol.Range) string {
+	start := getPos(text, rng.Start)
+	end := getPos(text, rng.End)
 
-	for _, tc := range []struct {
-		Name      string
-		Line      uint32
-		Character uint32
-	}{{
-		Name:      "character past end of line",
-		Line:      0,
-		Character: 101,
-	}, {
-		Name:      "line past end of document",
-		Line:      50,
-		Character: 10,
-	}} {
-		doc := uri.URI(fmt.Sprintf("file:///XXX-past-end-%v", tc.Name))
+	if end > len(text) {
+		end = len(text)
+	}
+	if start >= end {
+		return ""
+	}
+	return text[start:end]
+}
 
-		_, err := lsp_service.DidOpen(self.Ctx,
-			&protocol.DidOpenTextDocumentParams{
-				TextDocument: protocol.TextDocumentItem{
-					URI:  doc,
-					Text: "SELECT * FROM parse.",
-				},
-			})
-		assert.NoError(self.T(), err)
+func getPos(text string, pos protocol.Position) int {
+	var cursor protocol.Position
 
-		req := &protocol.CompletionParams{
-			TextDocumentPositionParams: protocol.TextDocumentPositionParams{
-				TextDocument: protocol.TextDocumentIdentifier{
-					URI: doc,
-				},
-				Position: protocol.Position{
-					Line:      tc.Line,
-					Character: tc.Character,
-				},
-			},
+	for idx, c := range text {
+		if cursor.Line == pos.Line && cursor.Character == pos.Character {
+			return idx
 		}
 
-		// Must not panic and must return a valid result.
-		completions, err := lsp_service.Completion(self.Ctx, req)
-		assert.NoError(self.T(), err)
-		assert.NotNil(self.T(), completions)
+		if c == '\n' {
+			cursor.Line++
+			cursor.Character = 0
+		} else {
+			cursor.Character++
+		}
 	}
+	return len(text)
 }

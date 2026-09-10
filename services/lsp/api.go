@@ -26,6 +26,24 @@ func elideDescription(in string) string {
 	return utils.Elide(parts[0], 80)
 }
 
+func GetFuncDesc(name, cs_type string) *api_proto.Completion {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if func_lookup == nil {
+		_ = loadApiDescriptions()
+	}
+
+	key := getFuncLookupKey(name, cs_type)
+	desc := func_lookup[key]
+
+	return desc
+}
+
+func getFuncLookupKey(name, cs_type string) string {
+	return name + ":" + strings.ToLower(cs_type)
+}
+
 func LoadApiDescriptions() []*api_proto.Completion {
 	mu.Lock()
 	defer mu.Unlock()
@@ -33,10 +51,11 @@ func LoadApiDescriptions() []*api_proto.Completion {
 }
 
 func loadApiDescriptions() []*api_proto.Completion {
-	if len(cachedDescriptions) > 0 {
+	if func_lookup != nil {
 		return cachedDescriptions
 	}
 
+	func_lookup = make(map[string]*api_proto.Completion)
 	descriptions, err := utils.LoadApiDescription()
 	if err != nil || len(descriptions) == 0 {
 		// The embedded reference document is compiled into every
@@ -52,6 +71,9 @@ func loadApiDescriptions() []*api_proto.Completion {
 
 	for _, d := range descriptions {
 		d.Description = elideDescription(d.Description)
+
+		key := getFuncLookupKey(d.Name, d.Type)
+		func_lookup[key] = d
 	}
 
 	// Cache it for next time.

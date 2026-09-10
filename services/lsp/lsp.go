@@ -24,7 +24,7 @@ type LSPServer struct {
 	documents map[uri.URI]*Document
 }
 
-func (self *LSPServer) getDoc(id uri.URI) (*Document, error) {
+func (self *LSPServer) GetDoc(id uri.URI) (*Document, error) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	doc, pres := self.documents[id]
@@ -67,7 +67,7 @@ func (self *LSPServer) LSP(
 		logger := logging.GetLogger(self.config_obj,
 			&logging.FrontendComponent)
 		logger.Error("LSP %v: recovered from panic: %v\n%v",
-			in.Operation, r, debug.Stack())
+			in.Operation, r, string(debug.Stack()))
 		err = fmt.Errorf("LSP operation %v failed: %v", in.Operation, r)
 	}()
 

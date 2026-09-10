@@ -18,6 +18,14 @@ func (self *LSPServer) DidOpen(
 		return nil, err
 	}
 
+	if document.AnalysisState.FailedToParse {
+		existing, err := self.GetDoc(params.TextDocument.URI)
+		if err == nil {
+			existing.UpdateTextFromDocument(document)
+			document = existing
+		}
+	}
+
 	self.setDoc(params.TextDocument.URI, document)
 
 	return document.Diagnostics(), nil
