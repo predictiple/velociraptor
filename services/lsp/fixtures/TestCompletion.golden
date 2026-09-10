@@ -698,7 +698,23 @@ Test case 6: Prefix fallback mid name
 SELECT * FROM parse_j
 SELECT * FROM parse_<--
 Diagnostics:
-[]
+[
+ {
+  "range": {
+   "start": {
+    "line": 0,
+    "character": 14
+   },
+   "end": {
+    "line": 0,
+    "character": 21
+   }
+  },
+  "severity": 1,
+  "source": "vql",
+  "message": "(1,15) unknown_plugin: Unknown plugin parse_j()"
+ }
+]
 Completions:
 [
  {
@@ -725,32 +741,6 @@ Completions:
     }
    },
    "newText": "parse_auditd()"
-  }
- },
- {
-  "label": "parse_binary",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a binary file into a data structure using a profile"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a binary file into a data structure using a profile"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_binary()"
   }
  },
  {
@@ -858,32 +848,6 @@ Completions:
   }
  },
  {
-  "label": "parse_float",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Convert a string to a float"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Convert a string to a float"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_float()"
-  }
- },
- {
   "label": "parse_journald",
   "labelDetails": {
    "detail": "Plugin",
@@ -907,58 +871,6 @@ Completions:
     }
    },
    "newText": "parse_journald()"
-  }
- },
- {
-  "label": "parse_json",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a JSON string into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a JSON string into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_json()"
-  }
- },
- {
-  "label": "parse_json_array",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a JSON string into an array"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a JSON string into an array"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_json_array()"
   }
  },
  {
@@ -1066,32 +978,6 @@ Completions:
   }
  },
  {
-  "label": "parse_ntfs",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse specific inodes from an NTFS image file or the raw ..."
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse specific inodes from an NTFS image file or the raw device"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_ntfs()"
-  }
- },
- {
   "label": "parse_ntfs_i30",
   "labelDetails": {
    "detail": "Plugin",
@@ -1141,58 +1027,6 @@ Completions:
     }
    },
    "newText": "parse_ntfs_ranges()"
-  }
- },
- {
-  "label": "parse_pe",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a PE file"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a PE file"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_pe()"
-  }
- },
- {
-  "label": "parse_pkcs7",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a DER encoded pkcs7 string into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a DER encoded pkcs7 string into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_pkcs7()"
   }
  },
  {
@@ -1274,32 +1108,6 @@ Completions:
   }
  },
  {
-  "label": "parse_string_with_regex",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a string with a set of regex and extract fields"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a string with a set of regex and extract fields"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_string_with_regex()"
-  }
- },
- {
   "label": "parse_usn",
   "labelDetails": {
    "detail": "Plugin",
@@ -1323,121 +1131,48 @@ Completions:
     }
    },
    "newText": "parse_usn()"
-  }
- },
- {
-  "label": "parse_x509",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a DER encoded x509 string into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a DER encoded x509 string into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_x509()"
-  }
- },
- {
-  "label": "parse_xml",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse an XML document into a dict like object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse an XML document into a dict like object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_xml()"
-  }
- },
- {
-  "label": "parse_yaml",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse yaml into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse yaml into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 21
-    }
-   },
-   "newText": "parse_yaml()"
   }
  }
 ]
 text edit:
 parse_j -> parse_auditd()
-parse_j -> parse_binary()
 parse_j -> parse_csv()
 parse_j -> parse_ese()
 parse_j -> parse_ese_catalog()
 parse_j -> parse_evtx()
-parse_j -> parse_float()
 parse_j -> parse_journald()
-parse_j -> parse_json()
-parse_j -> parse_json_array()
 parse_j -> parse_json_array()
 parse_j -> parse_jsonl()
 parse_j -> parse_lines()
 parse_j -> parse_mft()
-parse_j -> parse_ntfs()
 parse_j -> parse_ntfs_i30()
 parse_j -> parse_ntfs_ranges()
-parse_j -> parse_pe()
-parse_j -> parse_pkcs7()
 parse_j -> parse_pst()
 parse_j -> parse_records_with_regex()
 parse_j -> parse_recyclebin()
-parse_j -> parse_string_with_regex()
 parse_j -> parse_usn()
-parse_j -> parse_x509()
-parse_j -> parse_xml()
-parse_j -> parse_yaml()
 
 Test case 7: Plugin position after FROM only offers plugins
 select * from pars
 select * from pars<--
 Diagnostics:
-[]
+[
+ {
+  "range": {
+   "start": {
+    "line": 0,
+    "character": 14
+   },
+   "end": {
+    "line": 0,
+    "character": 18
+   }
+  },
+  "severity": 1,
+  "source": "vql",
+  "message": "(1,15) unknown_plugin: Unknown plugin pars()"
+ }
+]
 Completions:
 [
  {
@@ -1464,32 +1199,6 @@ Completions:
     }
    },
    "newText": "parse_auditd()"
-  }
- },
- {
-  "label": "parse_binary",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a binary file into a data structure using a profile"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a binary file into a data structure using a profile"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_binary()"
   }
  },
  {
@@ -1597,32 +1306,6 @@ Completions:
   }
  },
  {
-  "label": "parse_float",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Convert a string to a float"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Convert a string to a float"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_float()"
-  }
- },
- {
   "label": "parse_journald",
   "labelDetails": {
    "detail": "Plugin",
@@ -1646,58 +1329,6 @@ Completions:
     }
    },
    "newText": "parse_journald()"
-  }
- },
- {
-  "label": "parse_json",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a JSON string into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a JSON string into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_json()"
-  }
- },
- {
-  "label": "parse_json_array",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a JSON string into an array"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a JSON string into an array"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_json_array()"
   }
  },
  {
@@ -1805,32 +1436,6 @@ Completions:
   }
  },
  {
-  "label": "parse_ntfs",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse specific inodes from an NTFS image file or the raw ..."
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse specific inodes from an NTFS image file or the raw device"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_ntfs()"
-  }
- },
- {
   "label": "parse_ntfs_i30",
   "labelDetails": {
    "detail": "Plugin",
@@ -1880,58 +1485,6 @@ Completions:
     }
    },
    "newText": "parse_ntfs_ranges()"
-  }
- },
- {
-  "label": "parse_pe",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a PE file"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a PE file"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_pe()"
-  }
- },
- {
-  "label": "parse_pkcs7",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a DER encoded pkcs7 string into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a DER encoded pkcs7 string into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_pkcs7()"
   }
  },
  {
@@ -2013,32 +1566,6 @@ Completions:
   }
  },
  {
-  "label": "parse_string_with_regex",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a string with a set of regex and extract fields"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a string with a set of regex and extract fields"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_string_with_regex()"
-  }
- },
- {
   "label": "parse_usn",
   "labelDetails": {
    "detail": "Plugin",
@@ -2063,114 +1590,25 @@ Completions:
    },
    "newText": "parse_usn()"
   }
- },
- {
-  "label": "parse_x509",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse a DER encoded x509 string into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse a DER encoded x509 string into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_x509()"
-  }
- },
- {
-  "label": "parse_xml",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse an XML document into a dict like object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse an XML document into a dict like object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_xml()"
-  }
- },
- {
-  "label": "parse_yaml",
-  "labelDetails": {
-   "detail": "Function",
-   "description": "Parse yaml into an object"
-  },
-  "kind": 1,
-  "detail": "Built in Function",
-  "documentation": {
-   "kind": "markdown",
-   "value": "Parse yaml into an object"
-  },
-  "textEdit": {
-   "range": {
-    "start": {
-     "line": 0,
-     "character": 14
-    },
-    "end": {
-     "line": 0,
-     "character": 18
-    }
-   },
-   "newText": "parse_yaml()"
-  }
  }
 ]
 text edit:
 pars -> parse_auditd()
-pars -> parse_binary()
 pars -> parse_csv()
 pars -> parse_ese()
 pars -> parse_ese_catalog()
 pars -> parse_evtx()
-pars -> parse_float()
 pars -> parse_journald()
-pars -> parse_json()
-pars -> parse_json_array()
 pars -> parse_json_array()
 pars -> parse_jsonl()
 pars -> parse_lines()
 pars -> parse_mft()
-pars -> parse_ntfs()
 pars -> parse_ntfs_i30()
 pars -> parse_ntfs_ranges()
-pars -> parse_pe()
-pars -> parse_pkcs7()
 pars -> parse_pst()
 pars -> parse_records_with_regex()
 pars -> parse_recyclebin()
-pars -> parse_string_with_regex()
 pars -> parse_usn()
-pars -> parse_x509()
-pars -> parse_xml()
-pars -> parse_yaml()
 
 Test case 8: Unclosed paren completes args of the call before it
 SELECT * FROM pslist(
