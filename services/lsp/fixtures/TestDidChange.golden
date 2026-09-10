@@ -16,7 +16,7 @@ Completions after broken change:
    "kind": "plaintext",
    "value": "The root directory to glob from (default '')."
   },
-  "filterText": "glob",
+  "filterText": "glo",
   "textEdit": {
    "range": {
     "start": {
@@ -25,7 +25,7 @@ Completions after broken change:
     },
     "end": {
      "line": 0,
-     "character": 24
+     "character": 25
     }
    },
    "newText": "root="
@@ -43,7 +43,7 @@ Completions after broken change:
    "kind": "plaintext",
    "value": "If set we do not follow symlinks."
   },
-  "filterText": "glob",
+  "filterText": "glo",
   "textEdit": {
    "range": {
     "start": {
@@ -52,7 +52,7 @@ Completions after broken change:
     },
     "end": {
      "line": 0,
-     "character": 24
+     "character": 25
     }
    },
    "newText": "nosymlink="
@@ -70,7 +70,7 @@ Completions after broken change:
    "kind": "plaintext",
    "value": "A VQL function that determines if a directory should be recursed (e.g. \"x=>NOT x.Name =~ 'proc'\")."
   },
-  "filterText": "glob",
+  "filterText": "glo",
   "textEdit": {
    "range": {
     "start": {
@@ -79,7 +79,7 @@ Completions after broken change:
     },
     "end": {
      "line": 0,
-     "character": 24
+     "character": 25
     }
    },
    "newText": "recursion_callback="
@@ -97,7 +97,7 @@ Completions after broken change:
    "kind": "plaintext",
    "value": "If set we do not follow links to other filesystems."
   },
-  "filterText": "glob",
+  "filterText": "glo",
   "textEdit": {
    "range": {
     "start": {
@@ -106,7 +106,7 @@ Completions after broken change:
     },
     "end": {
      "line": 0,
-     "character": 24
+     "character": 25
     }
    },
    "newText": "one_filesystem="
