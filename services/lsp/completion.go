@@ -65,7 +65,7 @@ func (self *LSPServer) complete_function_names(
 	cursor *lexer.Position,
 	cs *vfilter.CallSite) (items []protocol.CompletionItem) {
 
-	match := doc.GetFragment(cs.Pos.Pos.Offset, cursor.Offset+1)
+	match := doc.GetFragment(cs.Pos.Pos.Offset, cursor.Offset)
 
 	desc_range := doc.WordAtPos(*cursor, '(')
 	identifier := doc.GetFragmentByRange(desc_range)
@@ -127,7 +127,7 @@ func (self *LSPServer) complete_arg_names(
 
 	// match is the fragment between the start of the identifier and
 	// the current cursor.
-	match := doc.GetFragment(id_range.Pos.Offset, cursor.Offset+1)
+	match := doc.GetFragment(id_range.Pos.Offset, cursor.Offset)
 
 	// Keep a record of existing args to the function.
 	found := make(map[string]bool)
