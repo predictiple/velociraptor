@@ -48,7 +48,7 @@ func isIdentifier(c uint8) bool {
 		(c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
 }
 
-// Return the text specified by the exclusive range rng.  Note that
+// Return the text specified by the exclusive range `rng`.  Note that
 // the last char in the returned string will be the same as
 // self.getChar(rng.EndPos.Offset-1)
 func (self *Document) GetFragmentByRange(rng vfilter.RangePosition) string {
@@ -62,7 +62,7 @@ func (self *Document) GetFragmentByRange(rng vfilter.RangePosition) string {
 //
 // If the cursor is on a white space, the function seeks back through
 // the whitespace to locate the identifier. If the identifier goes
-// aheads past the cursor then the function seeks forward to find the
+// ahead past the cursor then the function seeks forward to find the
 // entire identifier.
 //
 // If a sentinel is provided it is added to the identifier if it is

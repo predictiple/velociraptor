@@ -129,7 +129,7 @@ func (self *LSPServer) complete_arg_names(
 	// the current cursor.
 	match := doc.GetFragment(id_range.Pos.Offset, cursor.Offset+1)
 
-	// Keep a record of exisitng args to the function.
+	// Keep a record of existing args to the function.
 	found := make(map[string]bool)
 	for _, arg := range cs.Args {
 		found[arg.Name] = true
