@@ -56,10 +56,14 @@ var (
 	index_template = "gui/velociraptor/build/index.html"
 
 	// Fallback cross compilers (used when zig is not installed).
-	mingw_xcompiler    = "x86_64-w64-mingw32-gcc"
+
+	// apt-get install gcc-mingw-w64-x86-64
+	mingw_xcompiler = "x86_64-w64-mingw32-gcc"
+
+	// apt-get install gcc-mingw-w64
 	mingw_xcompiler_32 = "i686-w64-mingw32-gcc"
 	musl_xcompiler     = "musl-gcc"
-	name                = "velociraptor"
+	name               = "velociraptor"
 	version            = "v" + constants.VERSION
 
 	// https://github.com/googleapis/google-cloud-go/issues/11448
