@@ -52,10 +52,19 @@ jobs:
         echo "VSStest2" > c:\Users\test2.txt
         regedit /S artifacts/testdata/windows/init.reg
 
+    - name: Install zig
+      shell: bash
+      # The POSIX wrappers in build/zig/ cannot run on Windows, so
+      # here we use `zig cc` directly as the C compiler.
+      run: |
+        curl -fL https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip -o zig.zip
+        unzip -q zig.zip
+        echo "$PWD/zig-x86_64-windows-0.16.0" >> $GITHUB_PATH
+
     - name: Build
       if: success()
       env:
-        CC: x86_64-w64-mingw32-gcc
+        CC: zig cc
       shell: bash
       run: |
         go run make.go -v BasicAssets

@@ -55,13 +55,11 @@ var (
 
 	index_template = "gui/velociraptor/build/index.html"
 
-	// apt-get install gcc-mingw-w64-x86-64
-	mingw_xcompiler = "x86_64-w64-mingw32-gcc"
-
-	// apt-get install gcc-mingw-w64
+	// Fallback cross compilers (used when zig is not installed).
+	mingw_xcompiler    = "x86_64-w64-mingw32-gcc"
 	mingw_xcompiler_32 = "i686-w64-mingw32-gcc"
 	musl_xcompiler     = "musl-gcc"
-	name               = "velociraptor"
+	name                = "velociraptor"
 	version            = "v" + constants.VERSION
 
 	// https://github.com/googleapis/google-cloud-go/issues/11448
@@ -70,6 +68,49 @@ var (
 	// remove useless bloat.
 	base_tags = " server_vql extras disable_grpc_modules "
 )
+
+// getenv_or returns the value of the environment variable key, or
+// def if it is unset.  Used to override fallback compiler names
+// (e.g. MUSL_XCOMPILER) when zig is not available.
+func getenv_or(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
+
+// zig_detected returns true if zig is available in PATH.
+func zig_detected() bool {
+	err := sh.Run("zig", "version")
+	return err == nil
+}
+
+// resolve_cc selects the C compiler for a given target.  When zig is
+// installed it returns a zig cc invocation with the right -target
+// triple.  Otherwise it falls back to the named system compiler,
+// which can be overridden via environment variables (MUSL_XCOMPILER,
+// ARM64_XCOMPILER, ARMHF_XCOMPILER).
+func resolve_cc(cc string) string {
+	if zig_detected() {
+		switch cc {
+		case "musl-gcc":
+			return "zig cc -target x86_64-linux-musl"
+		case "aarch64-linux-gnu-gcc":
+			return "zig cc -target aarch64-linux-gnu"
+		case "arm-linux-gnueabihf-gcc":
+			return "zig cc -target arm-linux-gnueabihf"
+		}
+	}
+	switch cc {
+	case "musl-gcc":
+		return getenv_or("MUSL_XCOMPILER", cc)
+	case "aarch64-linux-gnu-gcc":
+		return getenv_or("ARM64_XCOMPILER", cc)
+	case "arm-linux-gnueabihf-gcc":
+		return getenv_or("ARMHF_XCOMPILER", cc)
+	}
+	return cc
+}
 
 func ReadAllWithLimit(
 	fd io.Reader, limit int) ([]byte, error) {
@@ -137,23 +178,62 @@ func (self *Builder) Env() map[string]string {
 		env["CGO_ENABLED"] = "1"
 	}
 
-	// If we are cross compiling, set the right compiler.
+	// Cross compile for Windows using zig cc when available.
+	// The -Wno-incompatible-function-pointer-types flag is needed
+	// because the WMI vtable in vql/windows/wmi/events.c triggers
+	// a clang diagnostic that is treated as an error under cgo's
+	// -Werror.  We pass it via CC (not CGO_CFLAGS) so that Go's
+	// default -O2 -g flags are not displaced — displacing them
+	// enabled UBSan instrumentation on the 386 target which broke
+	// the link.
 	if (runtime.GOOS == "linux" || runtime.GOOS == "darwin") &&
-		self.goos == "windows" {
+		self.goos == "windows" && zig_detected() {
 
+		target := "x86_64-windows-gnu"
+		if self.arch != "amd64" {
+			target = "x86-windows-gnu"
+		}
+		env["CC"] = "zig cc -target " + target +
+			" -Wno-incompatible-function-pointer-types"
+	} else if (runtime.GOOS == "linux" || runtime.GOOS == "darwin") &&
+		self.goos == "windows" {
+		// Fall back to system mingw when zig is not installed.
 		if self.arch == "amd64" {
 			if mingwxcompiler_exists() {
-				env["CC"] = mingw_xcompiler
+				env["CC"] = getenv_or("MINGW_XCOMPILER", mingw_xcompiler)
 			}
 		} else {
 			if mingwxcompiler32_exists() {
-				env["CC"] = mingw_xcompiler_32
+				env["CC"] = getenv_or("MINGW_XCOMPILER_32", mingw_xcompiler_32)
 			}
 		}
 	}
 
+	// Darwin builds need the Apple SDK.  When zig is available on
+	// a Mac it locates the SDK automatically via xcrun.
+	if runtime.GOOS == "darwin" && self.goos == "darwin" && zig_detected() {
+		target := "x86_64-macos"
+		minver := "-mmacosx-version-min=10.13"
+		if self.arch == "arm64" {
+			target = "aarch64-macos"
+			minver = "-mmacosx-version-min=11.0"
+		}
+		cc := "zig cc -target " + target + " " + minver
+		sdk := os.Getenv("ZIG_SDK")
+		if sdk == "" {
+			out, err := sh.Output("xcrun", "--show-sdk-path")
+			if err == nil {
+				sdk = strings.TrimSpace(out)
+			}
+		}
+		if sdk != "" {
+			cc += " -isysroot " + sdk
+		}
+		env["CC"] = cc
+	}
+
 	if self.cc != "" {
-		env["CC"] = self.cc
+		env["CC"] = resolve_cc(self.cc)
 	}
 	fmt.Printf("Build Environment: %v\n", json.MustMarshalString(env))
 	return env
@@ -619,18 +699,19 @@ func ensure_assets() error {
 	return UpdateDependentTools()
 }
 
+// These check for the system compilers (fallback when zig is absent).
 func mingwxcompiler_exists() bool {
-	err := sh.Run(mingw_xcompiler, "--version")
+	err := sh.Run(getenv_or("MINGW_XCOMPILER", mingw_xcompiler), "--version")
 	return err == nil
 }
 
 func musl_exists() bool {
-	err := sh.Run(musl_xcompiler, "--version")
+	err := sh.Run(getenv_or("MUSL_XCOMPILER", musl_xcompiler), "--version")
 	return err == nil
 }
 
 func mingwxcompiler32_exists() bool {
-	err := sh.Run(mingw_xcompiler_32, "--version")
+	err := sh.Run(getenv_or("MINGW_XCOMPILER_32", mingw_xcompiler_32), "--version")
 	return err == nil
 }
 

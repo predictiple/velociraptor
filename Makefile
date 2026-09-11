@@ -1,6 +1,15 @@
 all:
 	go run make.go -v autoDev
 
+# Install zig and prepare the zig cc cross compiler wrappers in
+# build/zig/.  Add build/zig/ to your PATH to use them:
+#   export PATH=$PWD/build/zig:$PATH
+# This replaces the need for mingw, musl and the linux cross gcc
+# packages.  Darwin builds still need the Apple SDK, which is located
+# automatically when building on a Mac.
+zig-setup:
+	./build/zig/setup.sh
+
 assets:
 	go run make.go -v assets
 

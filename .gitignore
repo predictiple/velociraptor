@@ -2,6 +2,9 @@ vendor/
 *~
 *.config.yaml
 ./velociraptor
+# Stray object file dropped by zig cc when cgo probes the compiler
+# with -o /dev/null for the darwin target (ziglang/zig#31806).
+-.o
 emacs.desktop
 /debian/debhelper-build-stamp
 /debian/files

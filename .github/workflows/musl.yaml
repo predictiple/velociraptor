@@ -30,17 +30,13 @@ jobs:
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
-        sudo apt-get update
-        sudo apt-get install -y zip build-essential pkg-config libssl-dev gcc-aarch64-linux-gnu
 
-    - name: Install Musl
+    - name: Install zig
+      # zig cc replaces the musl and aarch64 cross compilers.  The
+      # wrappers in build/zig/ impersonate the compilers the build
+      # system expects (musl-gcc, aarch64-linux-gnu-gcc, gcc).
       run: |
-        wget https://musl.libc.org/releases/musl-1.2.5.tar.gz
-        tar -xvzf musl-1.2.5.tar.gz
-        cd musl-1.2.5
-        ./configure
-        sudo make install
-        cd ..
+        ./build/zig/setup.sh
 
     - name: Use Node.js
       uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
@@ -51,11 +47,10 @@ jobs:
             npm install
             npm run build
             cd ../../
-
     - name: Build Musl Binary
       run: |
         mkdir ./output/
-        export PATH=$PATH:~/go/bin/:/usr/local/musl/bin
+        export PATH=$PATH:~/go/bin/:$GITHUB_WORKSPACE/build/zig
         go run make.go -v UpdateDependentTools
         go run make.go -v LinuxMusl
         go run make.go -v LinuxSumo
@@ -68,7 +63,7 @@ jobs:
         GIT_DOCKER_PAT: ${{ secrets.GIT_DOCKER_PAT }}
       run: |
         echo $GIT_DOCKER_PAT | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        export PATH=$PATH:~/go/bin/:/usr/local/musl/bin
+        export PATH=$PATH:~/go/bin/:$GITHUB_WORKSPACE/build/zig
         go run make.go -v Container
 
     - name: StoreBinaries

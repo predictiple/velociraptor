@@ -391,6 +391,10 @@ require (
 // replace github.com/Velocidex/zip => ../zip
 // replace github.com/Velocidex/sflags => ../sflags
 // replace github.com/Velocidex/etw => ../etw
+// Local vendored copy of etw with a cgo constant-folding workaround
+// for clang/zig cc (see third_party/etw/session.go).
+replace github.com/Velocidex/etw => ./third_party/etw
+
 // replace github.com/Velocidex/go-ewf => ../go-ewf
 // replace github.com/Velocidex/grpc-go-pool => ../grpc-go-pool
 // replace www.velocidex.com/golang/oleparse => ../oleparse

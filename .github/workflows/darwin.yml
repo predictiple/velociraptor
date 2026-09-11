@@ -1,6 +1,8 @@
-# Only trigger when a PR is committed or manually.
-name: Linux Build All Arches
-#on: [pull_request]
+# Build the darwin binaries on a Mac.  These targets need the Apple
+# SDK headers (mach, CoreFoundation, IOKit) which zig does not
+# bundle.  The zig cc wrappers in build/zig/ locate the SDK
+# automatically with `xcrun --show-sdk-path` when building on a Mac.
+name: Darwin Build All Arches
 on:
   pull_request:
     types: [closed]
@@ -12,9 +14,7 @@ jobs:
   build:
     if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
     name: Build
-    # We used to build on ubuntu-18.04 but that is now deprecated by
-    # GitHub. Earlier distributions will have to use the musl build.
-    runs-on: ubuntu-22.04
+    runs-on: macos-latest
     steps:
 
     - name: Check out code into the Go module directory
@@ -31,14 +31,7 @@ jobs:
 
     - run: go version
 
-    - name: Get dependencies
-      run: |
-        go get -v -t -d ./...
-
     - name: Install zig
-      # zig cc replaces the mingw cross compilers for the windows
-      # targets.  The wrappers in build/zig/ impersonate the
-      # compilers the build system expects.
       run: |
         ./build/zig/setup.sh
 
@@ -52,17 +45,13 @@ jobs:
             npm run build
             cd ../../
 
-    - name: Build All Architectures
-      # Uncomment the architectures you want here. NOTE: DarwinBase
-      # does not include yara or modules with C compilers needed.
+    - name: Build Darwin Binaries
       run: |
         mkdir ./output/
         export PATH=$PATH:~/go/bin/:$GITHUB_WORKSPACE/build/zig
         go run make.go -v UpdateDependentTools
-        go run make.go -v DarwinBase
-        go run make.go -v Windows
-        go run make.go -v WindowsSumo
-        go run make.go -v Windowsx86
+        go run make.go -v Darwin
+        go run make.go -v DarwinM1
 
     - name: StoreBinaries
       uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1
