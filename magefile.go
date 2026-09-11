@@ -232,6 +232,17 @@ func (self *Builder) Env() map[string]string {
 		env["CC"] = cc
 	}
 
+	// zig cc treats -g as overriding -s when -s appears first.  The
+	// Go linker emits -s before the CGO_LDFLAGS (default "-O2 -g"),
+	// so with zig cc the -g wins and the final binary keeps clang's
+	// DWARF debug info — making it ~15-20% larger than a gcc build
+	// (which strips correctly).  Appending a trailing -s to
+	// CGO_LDFLAGS makes stripping win.  gcc ignores the duplicate
+	// -s, so this is safe for both compilers.
+	if !self.debug_build {
+		env["CGO_LDFLAGS"] = "-O2 -g -s"
+	}
+
 	if self.cc != "" {
 		env["CC"] = resolve_cc(self.cc)
 	}
