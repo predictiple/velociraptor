@@ -391,9 +391,9 @@ require (
 // replace github.com/Velocidex/zip => ../zip
 // replace github.com/Velocidex/sflags => ../sflags
 // replace github.com/Velocidex/etw => ../etw
-// Local vendored copy of etw with a cgo constant-folding workaround
-// for clang/zig cc (see third_party/etw/session.go).
-replace github.com/Velocidex/etw => ./third_party/etw
+// Fork of etw with a cgo constant-folding workaround for clang/zig cc.
+// https://github.com/predictiple/etw/tree/zigcc-toolchains
+replace github.com/Velocidex/etw => github.com/predictiple/etw v0.0.0-20260912055653-bb13f71e204f
 
 // replace github.com/Velocidex/go-ewf => ../go-ewf
 // replace github.com/Velocidex/grpc-go-pool => ../grpc-go-pool
